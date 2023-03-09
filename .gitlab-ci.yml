@@ -1,0 +1,76 @@
+stages:
+  - lint
+  - test
+
+variables:
+  CI_IMAGE_BASE: "kcr.private.kvado.ru/${CI_PROJECT_PATH}"
+
+.lint:
+  image: registry.gitlab.com/gitlab-org/gitlab-build-images:golangci-lint-alpine
+  stage: lint
+  script:
+    - git config --global url."https://gitlab-ci-token:${CI_JOB_TOKEN}@gitlab.private.kvado.ru".insteadOf "https://gitlab.private.kvado.ru"
+    # Use default .golangci.yml file from the image if one is not present in the project root.
+    - '[ -e .golangci.yml ] || cp /golangci/.golangci.yml .'
+    # Write the code coverage report to gl-code-quality-report.json
+    # and print linting issues to stdout in the format: path/to/file:line description
+    # remove `--issues-exit-code 0` or set to non-zero to fail the job if linting issues are detected
+    - golangci-lint run -v
+
+.test-all:
+  stage: test
+  image: golang:1.17
+  services:
+    - docker:dind
+  variables:
+    DEBIAN_FRONTEND: noninteractive
+    DOCKER_HOST: tcp://127.0.0.1:2376
+    DOCKER_TLS_CERTDIR: "/certs"
+    DOCKER_TLS_VERIFY: 1
+    DOCKER_CERT_PATH: "$DOCKER_TLS_CERTDIR/client"
+  script:
+      - apt-get update
+      - apt-get install -yq make iproute2
+      - make start-unit-test
+
+.any:
+  environment:
+    name: any
+  tags:
+    - cluster/kvado_k8s
+    - namespace/kvado_test
+
+.master:
+  only:
+    - master
+  environment:
+    name: production
+  tags:
+    - cluster/kvado_k8s
+    - namespace/kvado_production
+  variables:
+    DOCKER_TAG: latest
+
+.merge_request_test:
+  only:
+    - merge_requests
+  environment:
+    name: test
+  tags:
+    - cluster/kvado_k8s
+    - namespace/kvado_test
+
+lint_any:
+  extends:
+    - .lint
+    - .any
+
+test-all_master:
+  extends:
+    - .test-all
+    - .master
+
+test_on_merge_request:
+  extends:
+    - .test-all
+    - .merge_request_test
