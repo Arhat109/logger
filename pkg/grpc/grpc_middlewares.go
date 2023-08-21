@@ -2,7 +2,7 @@ package grpc
 
 import (
 	"context"
-	"github.com/Arhat109/logger/pkg/dto"
+	"github.com/Arhat109/logger/pkg/logger"
 	"github.com/google/uuid"
 	"google.golang.org/grpc"
 	"time"
@@ -19,7 +19,7 @@ func QueryAndSetTracingId(ctx context.Context, name string) {
 }
 
 // UnaryTracingInterceptor -- отслеживает наличие уникального идента запроса и создает его в случае отсутствия
-func UnaryTracingInterceptor(lgr dto.Loggable) grpc.UnaryServerInterceptor {
+func UnaryTracingInterceptor(lgr logger.Loggable) grpc.UnaryServerInterceptor {
 	return func(ctx context.Context, req any, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (resp any, err error) {
 		QueryAndSetTracingId(ctx, lgr.GetTraceId())
 		return handler(ctx, req)
@@ -27,7 +27,7 @@ func UnaryTracingInterceptor(lgr dto.Loggable) grpc.UnaryServerInterceptor {
 }
 
 // UnaryLoggerInterceptor returns a new unary server interceptors that adds zap.Logger to the context.
-func UnaryLoggerInterceptor(lgr dto.Loggable) grpc.UnaryServerInterceptor {
+func UnaryLoggerInterceptor(lgr logger.Loggable) grpc.UnaryServerInterceptor {
 	return func(ctx context.Context, req any, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (any, error) {
 		startedAt := time.Now()
 		resp, err := handler(ctx, req)
@@ -42,7 +42,7 @@ func UnaryLoggerInterceptor(lgr dto.Loggable) grpc.UnaryServerInterceptor {
 }
 
 // StreamTracingInterceptor -- отслеживает наличие уникального идента запроса и создает его в случае отсутствия
-func StreamTracingInterceptor(lgr dto.Loggable) grpc.StreamServerInterceptor {
+func StreamTracingInterceptor(lgr logger.Loggable) grpc.StreamServerInterceptor {
 	return func(srv any, stream grpc.ServerStream, info *grpc.StreamServerInfo, handler grpc.StreamHandler) error {
 		QueryAndSetTracingId(stream.Context(), lgr.GetTraceId())
 		return handler(srv, stream)
@@ -50,7 +50,7 @@ func StreamTracingInterceptor(lgr dto.Loggable) grpc.StreamServerInterceptor {
 }
 
 // StreamLoggerInterceptor returns a new unary server interceptors that adds zap.Logger to the context.
-func StreamLoggerInterceptor(lgr dto.Loggable) grpc.StreamServerInterceptor {
+func StreamLoggerInterceptor(lgr logger.Loggable) grpc.StreamServerInterceptor {
 	return func(srv any, stream grpc.ServerStream, info *grpc.StreamServerInfo, handler grpc.StreamHandler) error {
 		startedAt := time.Now()
 		err := handler(srv, stream)

@@ -2,7 +2,10 @@ module github.com/Arhat109/logger
 
 go 1.19
 
-require google.golang.org/grpc v1.53.0
+require (
+	github.com/google/uuid v1.3.0
+	google.golang.org/grpc v1.53.0
+)
 
 require (
 	github.com/golang/protobuf v1.5.2 // indirect

@@ -1,4 +1,4 @@
-package tools
+package logger
 
 import (
 	"fmt"
@@ -21,7 +21,7 @@ func LookupEnv(name string, defVal interface{}) interface{} {
 	return defVal
 }
 
-// ToInt -- Преобразование результата к целому
+// ToInt -- Преобразование результата к целому @see config.go
 func ToInt(val interface{}) int {
 	switch v := val.(type) {
 	case int:
@@ -38,13 +38,34 @@ func ToInt(val interface{}) int {
 	return 0
 }
 
-// ToString -- Преобразование результата к строке
+// ToString -- Преобразование результата к строке @see config.go
 func ToString(val interface{}) string {
-	if strVal, ok := val.(string); ok {
-		return strVal
+	switch v := val.(type) {
+	case string:
+		return v
+	case []byte:
+		return string(v)
+	case fmt.Stringer:
+		return v.String()
+	default:
+		return fmt.Sprintf("%v", v)
 	}
-	glErrors = append(glErrors, fmt.Errorf(
-		"ToString() ERROR! value %v is not STRING!", val,
-	))
-	return ""
+}
+
+// itoaBuf -- Cheap integer to fixed-width decimal ASCII. Give a negative width to avoid zero-padding.
+// @author стырено log это лучше чем strconv.AppendInt()
+func itoaBuf(buf *[]byte, i int, wid int) {
+	// Assemble decimal in reverse order.
+	var b [20]byte
+	bp := len(b) - 1
+	for i >= 10 || wid > 1 {
+		wid--
+		q := i / 10
+		b[bp] = byte('0' + i - q*10)
+		bp--
+		i = q
+	}
+	// i < 10
+	b[bp] = byte('0' + i)
+	*buf = append(*buf, b[bp:]...)
 }
