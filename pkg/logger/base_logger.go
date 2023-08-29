@@ -180,7 +180,7 @@ func (baselog *BaseLogger) Panic(msg string, args ...any) {
 
 // NewBaseLogger -- генератор (в куче!) нового логгера из настроек @see ./config.go
 // param Args -- доп. параметры конфигуратора (если надо!): тут можно задать маршаллер в json
-func NewBaseLogger(cfg *LogConfig, args ...any) (Loggable, error) {
+func NewBaseLogger(cfg *LogConfig, args ...any) (Levelable, error) {
 	var err error
 	logger := &BaseLogger{}
 
