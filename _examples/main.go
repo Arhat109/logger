@@ -44,8 +44,10 @@ func AddPoint() {
 
 func main() {
 	var err error
-	var lgr = &logger.BaseLogger{Out: outWriter}
+	//var lgr = &logger.BaseLogger{Out: outWriter}
+	var lgr = &logger.BaseLogger{}
 	lgr.Init(&logger.LogConfig{
+		Out:    "./example.log",
 		IsJson: false,
 		Flags:  logger.LogDate,
 		Level:  logger.LogDebugLevel,
