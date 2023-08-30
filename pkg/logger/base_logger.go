@@ -82,6 +82,8 @@ func (baselog *BaseLogger) Init(cfg *LogConfig, retErr *error, args ...any) *Bas
 // Level:{ yyyy-mm-dd hh:mm:ss.msec}{ file_name#line) | func_name#line }message\n
 // {} -- опционально, если они есть. Склеиваются перед сообщением "как есть", разделять самостоятельно!
 func (baselog *BaseLogger) FormatString(buf *[]byte, depth int, now time.Time, level, message string) {
+	*buf = append(*buf, "\n"...)
+
 	if color, ok := GlDefColors[level]; baselog.Flags&LogLevelColored != 0 && ok {
 		FormatColored(buf, color, level)
 		*buf = append(*buf, ':')
