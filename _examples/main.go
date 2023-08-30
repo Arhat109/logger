@@ -53,7 +53,7 @@ func main() {
 		Level:  logger.LogDebugLevel,
 	}, &err)
 	if err != nil {
-		return
+		panic("Can't init BaseLogger! " + err.Error())
 	}
 
 	runtime.GC()
@@ -61,7 +61,7 @@ func main() {
 	for i := 0; i < Repeats; i++ {
 		outWriter.Reset()
 		//AddPoint()
-		lgr.Debug("This a simple message")
+		lgr.Debug("This is a new message!")
 		//AddPoint() // [2] for first cycle
 	}
 	AddPoint()

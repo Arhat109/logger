@@ -1,6 +1,7 @@
 package logger
 
 import (
+	"errors"
 	"fmt"
 	"io"
 	"os"
@@ -54,7 +55,14 @@ func (baselog *BaseLogger) Init(cfg *LogConfig, retErr *error, args ...any) *Bas
 		baselog.Out = os.Stderr
 	default:
 		if cfg.Out != "" {
-			file, err := os.OpenFile(cfg.Out, os.O_RDWR|os.O_APPEND|os.O_CREATE, 0x777)
+			var file *os.File
+			var err error
+
+			if _, err = os.Stat(cfg.Out); errors.Is(err, os.ErrNotExist) {
+				file, err = os.OpenFile(cfg.Out, os.O_RDWR|os.O_CREATE, 0664)
+			} else {
+				file, err = os.OpenFile(cfg.Out, os.O_RDWR|os.O_APPEND, 0664)
+			}
 			if err != nil {
 				*retErr = fmt.Errorf("BaseLogger.Init() OpenFile has: %s", err.Error())
 			}
