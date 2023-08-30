@@ -54,7 +54,7 @@ func (baselog *BaseLogger) Init(cfg *LogConfig, retErr *error, args ...any) *Bas
 		baselog.Out = os.Stderr
 	default:
 		if cfg.Out != "" {
-			file, err := os.OpenFile(cfg.Out, os.O_WRONLY|os.O_APPEND|os.O_CREATE, 0x774)
+			file, err := os.OpenFile(cfg.Out, os.O_RDWR|os.O_APPEND, 0x774)
 			if err != nil {
 				*retErr = fmt.Errorf("BaseLogger.Init() OpenFile has: %s", err.Error())
 			}
